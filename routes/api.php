@@ -26,8 +26,6 @@ Route::post('auth/login', 'TuArtController@login');
 Route::group(['middleware' => 'jwt.auth'], function () {
     Route::post('user-info', 'TuArtController@getUserInfo');
 });
-
-
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'jwt.auth'], function () {
+    Route::get('user-info', 'TuArtController@getUserInfo1');
 });

@@ -22,6 +22,11 @@ class TuArtController extends Controller
         return response()->json(['result' => $player]);
     }
 
+    public function getUserInfo1(Request $request){
+        $player = JWTAuth::toUser($request->token);
+        return response()->json(['result' => $player]);
+    }
+
     public function login(Request $request){
         $credentials = $request->only('phone_number', 'name');
         $player = Player::where('phone_number', '=', $credentials['phone_number'])->first();
