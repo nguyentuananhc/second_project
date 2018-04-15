@@ -170,6 +170,7 @@ return [
         Barryvdh\Cors\ServiceProvider::class,
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
         TCG\Voyager\VoyagerServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
         /*
          * Application Service Providers...
          */
@@ -228,6 +229,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
     ],
 
 ];
