@@ -29,3 +29,9 @@ Route::group(['middleware' => 'jwt.auth'], function () {
 Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('user-info', 'TuArtController@getUserInfo1');
 });
+
+Route::group(['middleware' => 'jwt.auth'], function () {
+    Route::get('test-token', 'TuArtController@testTokenHeader');
+});
+
+Route::post('auth/login', 'TuArtController@login');

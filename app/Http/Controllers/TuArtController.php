@@ -17,6 +17,12 @@ class TuArtController extends Controller
         $this->player = $player;
     }
 
+    public function testTokenHeader(Request $request){
+        $header = $request->header('token');
+        dd($header);
+    }
+
+
     public function getUserInfo(Request $request){
         $player = JWTAuth::toUser($request->token);
         return response()->json(['result' => $player]);
