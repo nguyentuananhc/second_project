@@ -69,11 +69,14 @@ return [
     */
 
     'providers' => [
+        // 'users' => [
+        //     'driver' => 'eloquent',
+        //     'model' => App\Player::class,
+        // ],
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Player::class,
+            'model' => App\User::class,
         ],
-
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

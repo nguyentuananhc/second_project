@@ -34,6 +34,8 @@ class TuArtController extends Controller
     }
 
     public function login(Request $request){
+        Config::set('jwt.user','App\Player');
+        Config::set('auth.providers.users.model', \App\Player::class);
         $credentials = $request->only('phone_number', 'name');
         $player = Player::where('phone_number', '=', $credentials['phone_number'])->first();
         $token = JWTAuth::fromUser($player);
