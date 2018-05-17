@@ -11,7 +11,7 @@ class Player extends Authenticatable
     //
     use Notifiable;
     protected $table = 'players';
-    protected $fillable = ['name', 'phone_number', 'score', 'voucher_id'];
+    protected $fillable = ['name', 'email', 'phone_number', 'score', 'voucher_id', 'facebook_id'];
     /**
      * The attributes that should be hidden for arrays.
      *

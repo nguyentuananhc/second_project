@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Config;
 use Closure;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -19,6 +20,8 @@ class VerifyJWTToken
     public function handle($request, Closure $next)
     {
         try {
+            Config::set('jwt.user','App\Player');
+            Config::set('auth.providers.users.model', \App\Player::class);
             $header = $request->header('token');
             $user = JWTAuth::toUser($header);
         }catch (JWTException $e) {

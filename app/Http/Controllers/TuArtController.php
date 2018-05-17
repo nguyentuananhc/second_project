@@ -2,12 +2,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Validator;
 use App\Player;
 use Illuminate\Http\Request;
+use App\Services\TuArtAccountService;
 use JWTAuth;
 use JWTAuthException;
 use Hash;
 use Config;
+use Socialte;
 
 class TuArtController extends Controller
 {
@@ -17,28 +20,47 @@ class TuArtController extends Controller
         $this->player = $player;
     }
 
-    public function testTokenHeader(Request $request){
-        $header = $request->header('token');
-        dd($header);
+    public function getUserFromToken($token){
+        $player = JWTAuth::toUser($token);
+        return $player;
     }
-
 
     public function getUserInfo(Request $request){
-        $player = JWTAuth::toUser($request->token);
-        return response()->json(['result' => $player]);
-    }
-
-    public function getUserInfo1(Request $request){
-        $player = JWTAuth::toUser($request->token);
+        $token = $request->header('token');
+        $player = $this->getUserFromToken($token);
         return response()->json(['result' => $player]);
     }
 
     public function login(Request $request){
-        Config::set('jwt.user','App\Player');
-        Config::set('auth.providers.users.model', \App\Player::class);
-        $credentials = $request->only('phone_number', 'name');
-        $player = Player::where('phone_number', '=', $credentials['phone_number'])->first();
+        $credentials = $request->only('facebookId');
+        $player = TuArtAccountService::createOrGetUser($credentials['facebookId']);
         $token = JWTAuth::fromUser($player);
         return response()->json(compact('token'));
+    }
+
+    public function updatePlayerInfor(Request $request){
+        $validator = Validator::make($request->all(), [
+            'name'=> 'required|string',
+            'email' => 'required|string|email|max:255',
+            'phone_number' => 'required|numeric',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 1,
+                'message' => $validator->errors(),
+            ]);
+        }
+        $token = $request->header('token');
+        $player = $this->getUserFromToken($token);
+        $player->update([
+            'name' => $request->get('name'),
+            'email' => $request->get('email'),
+            'phone_number' => $request->get('phone_number'),
+        ]);
+        $player->save();
+        return response()->json([
+            'error' => 0,
+            'result' => $player
+        ]);
     }
 }
