@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Validator;
 use App\Player;
+use App\GameRequest;
 use Illuminate\Http\Request;
 use App\Services\TuArtAccountService;
 use JWTAuth;
@@ -62,5 +63,68 @@ class TuArtController extends Controller
             'error' => 0,
             'result' => $player
         ]);
+    }
+
+    public function createGameRequest(Request $request){
+        $validator = Validator::make($request->all(), [
+            'lvl' => 'required|numeric|min:1|max:6',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 1,
+                'message' => $validator->errors(),
+            ]);
+        }
+        $token = $request->header('token');
+        $level = $request->get('lvl');
+        $player = $this->getUserFromToken($token);
+        if($player['lvl'.$level] < 3){
+            $user = GameRequest::create([
+                'player_id' => $player['facebook_id'],
+                'score' => 0,
+                'lvl' =>  $level,
+                'status' => 0,
+            ]);
+            return response()->json([
+                'error' => 0,
+                'message' => 'Create Request Success!'
+            ]);
+        }
+        return response()->json([
+            'error' => 0,
+            'message' => 'Create Request Failed!'
+        ]);
+    }
+
+    public function checkGameRequest(Request $request){
+        $validator = Validator::make($request->all(), [
+            'score' => 'required|numeric|min:0|max:3',
+            'request_id'=> 'required|numeric',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 1,
+                'message' => $validator->errors(),
+            ]);
+        }
+        $token = $request->header('token');
+        $player = $this->getUserFromToken($token);
+        $requestId = $request->get('request_id');
+        $gameRequest = GameRequest::where('id', '=', $requestId)->first();
+        if (!$gameRequest) {
+            return response()->json([
+                'error' => 1,
+                'message' => 'Request not found!',
+            ]);
+        }
+        $gameRequest->score = $request->get('score');
+        $gameRequest->save();
+        $playTime = strtotime($gameRequest['updated_at']) - strtotime($gameRequest['created_at']);
+        dd($playTime);
+        if($playTime > 60){
+            //update score to player
+        }else{
+            //mess fail
+        }
     }
 }
