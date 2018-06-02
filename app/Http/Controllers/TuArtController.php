@@ -5,11 +5,15 @@ use App\Http\Controllers\Controller;
 use Validator;
 use App\Player;
 use App\GameRequest;
+use App\ClaimRequest;
+use App\Voucher;
 use Illuminate\Http\Request;
 use App\Services\TuArtAccountService;
 use JWTAuth;
 use JWTAuthException;
 use Carbon\Carbon;
+use Socialite;
+use DB;
 
 class TuArtController extends Controller
 {
@@ -33,6 +37,16 @@ class TuArtController extends Controller
     public function login(Request $request){
         $credentials = $request->only('facebookId');
         $player = TuArtAccountService::createOrGetUser($credentials['facebookId']);
+        $token = JWTAuth::fromUser($player);
+        return response()->json(compact('token'));
+    }
+
+    public function loginFb(Request $request){
+        $token = $request->get('access_token');
+        $requestedUser = Socialite::driver('facebook')->userFromToken($token);
+        // dd($requestedUser);
+        $userID = $requestedUser->getId();
+        $player = TuArtAccountService::createOrGetUser($userID);
         $token = JWTAuth::fromUser($player);
         return response()->json(compact('token'));
     }
@@ -161,6 +175,58 @@ class TuArtController extends Controller
         return response()->json([
             'error' => 0,
             'message' => 'Reset game success!',
+        ]);
+    }
+
+    public function requestClaim(Request $request){
+        $token = $request->header('token');
+        $player = $this->getUserFromToken($token);
+        $validator = Validator::make($request->all(), [
+            'voucher_id'=> 'required|numeric',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 1,
+                'message' => $validator->errors(),
+            ]);
+        }
+        if($player['is_claim'] = 1) {
+            return response()->json([
+                'error' => 1,
+                'message' => 'Player Cannot Make Claim Request',
+            ]);
+        }
+        $voucher = Voucher::where('id', '=', $request->get('voucher_id'))->first();
+        if(!$voucher){
+            return response()->json([
+                'error' => 1,
+                'message' => 'Incorrect Voucher Id!',
+            ]);
+        }
+        if(!$voucher->amount = 0){
+            return response()->json([
+                'error' => 1,
+                'message' => 'Cannot Claim This Voucher!',
+            ]);
+        }
+        DB::table('claim_requests')->insert([
+            ['player_id' => $player['facebook_id'], 'voucher_id' => $request->get('voucher_id')],
+        ]);
+        $player['is_claim'] = 1;
+        $voucher->amount -= 1;
+        $player->save();
+        return response()->json([
+            'error' => 0,
+            'message' => 'Request claim success!',
+        ]);
+    }
+
+    public function getListPrize(Request $request){
+        $list = Voucher::all();
+        return response()->json([
+            'error' => 0,
+            'result' => $list,
+            'message' => 'Request claim success!',
         ]);
     }
 }
