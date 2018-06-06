@@ -91,15 +91,19 @@ class TuArtController extends Controller
         $level = $request->get('lvl');
         $player = $this->getUserFromToken($token);
         if($player['lvl'.$level] < 3){
-            $user = GameRequest::create([
-                'player_id' => $player['facebook_id'],
+            $gameRequest = GameRequest::create([
+                'player_id' => $player['id'],
                 'score' => 0,
                 'lvl' =>  $level,
                 'status' => 0,
             ]);
+            $obj = new \stdClass;
+            $obj->id = $gameRequest->id;
+            $obj->id = $gameRequest->id;
             return response()->json([
                 'error' => 0,
-                'message' => 'Create Request Success!'
+                'message' => 'Create Request Success!',
+                'result' => $obj,
             ]);
         }
         return response()->json([
@@ -123,7 +127,7 @@ class TuArtController extends Controller
         $player = $this->getUserFromToken($token);
         $requestId = $request->get('request_id');
         $gameRequest = GameRequest::where('id', '=', $requestId)->first();
-        if (!$gameRequest || ($player['facebook_id'] != $gameRequest['player_id'])) {
+        if (!$gameRequest || ($player['id'] != $gameRequest['player_id'])) {
             return response()->json([
                 'error' => 1,
                 'message' => 'Request not found!',
@@ -140,7 +144,7 @@ class TuArtController extends Controller
         $gameRequest['play_time'] = strtotime(Carbon::now()->toDateTimeString()) - strtotime($gameRequest['created_at']);
         $gameRequest->status = 1;
         $gameRequest->save();
-        if ($gameRequestp['play_time'] >= 60){
+        if ($gameRequest['play_time'] >= 60){
             $player['lvl'.$gameRequest->lvl] = $gameRequest->score;
             $player->save();
             return response()->json([
@@ -210,7 +214,7 @@ class TuArtController extends Controller
             ]);
         }
         DB::table('claim_requests')->insert([
-            ['player_id' => $player['facebook_id'], 'voucher_id' => $request->get('voucher_id')],
+            ['player_id' => $player['id'], 'voucher_id' => $request->get('voucher_id')],
         ]);
         $player['is_claim'] = 1;
         $voucher->amount -= 1;
