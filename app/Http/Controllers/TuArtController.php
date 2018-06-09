@@ -251,4 +251,15 @@ class TuArtController extends Controller
             'message' => 'Shared FaceBook claim success!',
         ]);
     }
+
+    public function passTutorial(Request $request){
+        $token = $request->header('token');
+        $player = $this->getUserFromToken($token);
+        $player['is_tutorial'] = 1;
+        $player->save();
+        return response()->json([
+            'error' => 0,
+            'message' => 'Player Have Pass Tutorial!',
+        ]);
+    }
 }

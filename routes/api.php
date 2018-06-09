@@ -23,6 +23,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::post('reset-game', 'TuArtController@resetGame');
     Route::post('create-claim-request', 'TuArtController@requestClaim');
     Route::post('share-fb', 'TuArtController@shareFacbook');
+    Route::post('pass-tutorial', 'TuArtController@passTutorial');
 });
 Route::post('auth/loginfb', 'TuArtController@loginFb');
 Route::get('get-list-voucher', 'TuArtController@getListPrize');
