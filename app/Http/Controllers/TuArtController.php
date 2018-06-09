@@ -23,6 +23,12 @@ class TuArtController extends Controller
         $this->player = $player;
     }
 
+    public function getStarFromUser($player){
+        $star = $player['lvl1'] + $player['lvl2'] + $player['num_replay']*6 + $player['is_share']*3;
+        return $star;
+    }
+
+
     public function getUserFromToken($token){
         $player = JWTAuth::toUser($token);
         return $player;
@@ -31,20 +37,15 @@ class TuArtController extends Controller
     public function getUserInfo(Request $request){
         $token = $request->header('token');
         $player = $this->getUserFromToken($token);
+        $star = $this->getStarFromUser($player);
+        $player->star = $star;
+        $player->save();
         return response()->json(['result' => $player]);
-    }
-
-    public function login(Request $request){
-        $credentials = $request->only('facebookId');
-        $player = TuArtAccountService::createOrGetUser($credentials['facebookId']);
-        $token = JWTAuth::fromUser($player);
-        return response()->json(compact('token'));
     }
 
     public function loginFb(Request $request){
         $token = $request->get('access_token');
         $requestedUser = Socialite::driver('facebook')->userFromToken($token);
-        // dd($requestedUser);
         $userID = $requestedUser->getId();
         $player = TuArtAccountService::createOrGetUser($userID);
         $token = JWTAuth::fromUser($player);
@@ -79,7 +80,7 @@ class TuArtController extends Controller
 
     public function createGameRequest(Request $request){
         $validator = Validator::make($request->all(), [
-            'lvl' => 'required|numeric|min:1|max:6',
+            'lvl' => 'required|numeric|min:1|max:2',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -144,7 +145,7 @@ class TuArtController extends Controller
         $gameRequest['play_time'] = strtotime(Carbon::now()->toDateTimeString()) - strtotime($gameRequest['created_at']);
         $gameRequest->status = 1;
         $gameRequest->save();
-        if ($gameRequest['play_time'] >= 60){
+        if ($gameRequest['play_time'] >= 30){
             $player['lvl'.$gameRequest->lvl] = $gameRequest->score;
             $player->save();
             return response()->json([
@@ -162,7 +163,7 @@ class TuArtController extends Controller
     public function resetGame(Request $request){
         $token = $request->header('token');
         $player = $this->getUserFromToken($token);
-        $arr = [1,2,3,4,5,6];
+        $arr = [1,2];
         foreach($arr as $num){
             if($player['lvl'.$num] < 3) {
                 return response()->json([
@@ -213,6 +214,12 @@ class TuArtController extends Controller
                 'message' => 'Cannot Claim This Voucher!',
             ]);
         }
+        if($voucher->value > $player->star){
+            return response()->json([
+                'error' => 1,
+                'message' => 'Cannot Claim This Voucher, Dont Enough Star!',
+            ]);
+        }
         DB::table('claim_requests')->insert([
             ['player_id' => $player['id'], 'voucher_id' => $request->get('voucher_id')],
         ]);
@@ -221,7 +228,7 @@ class TuArtController extends Controller
         $player->save();
         return response()->json([
             'error' => 0,
-            'message' => 'Request claim success!',
+            'message' => 'Request Claim Success!',
         ]);
     }
 
