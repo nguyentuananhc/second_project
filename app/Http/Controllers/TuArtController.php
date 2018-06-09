@@ -38,7 +38,7 @@ class TuArtController extends Controller
         $token = $request->header('token');
         $player = $this->getUserFromToken($token);
         $star = $this->getStarFromUser($player);
-        $player->star = $star;
+        $player->stars = $star;
         $player->save();
         return response()->json(['result' => $player]);
     }
