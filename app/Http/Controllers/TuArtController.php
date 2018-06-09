@@ -240,4 +240,15 @@ class TuArtController extends Controller
             'message' => 'Request claim success!',
         ]);
     }
+
+    public function shareFacbook(Request $request){
+        $token = $request->header('token');
+        $player = $this->getUserFromToken($token);
+        $player['is_share'] = 1;
+        $player->save();
+        return response()->json([
+            'error' => 0,
+            'message' => 'Shared FaceBook claim success!',
+        ]);
+    }
 }
