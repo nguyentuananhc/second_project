@@ -13,7 +13,7 @@ class Player extends Authenticatable
     protected $table = 'players';
     protected $fillable = [
         'name', 'email', 'phone_number', 'score', 'voucher_id', 'facebook_id',
-        'lvl1', 'lvl2', 'lvl3', 'lvl4', 'lvl5', 'lvl6',
+        'lvl1', 'lvl2', 'stars', 'is_share', 'is_tutorial',
     ];
     /**
      * The attributes that should be hidden for arrays.

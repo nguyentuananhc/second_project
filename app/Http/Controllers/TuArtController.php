@@ -195,7 +195,7 @@ class TuArtController extends Controller
                 'message' => $validator->errors(),
             ]);
         }
-        if($player['is_claim'] = 1) {
+        if($player['is_claim'] == 1) {
             return response()->json([
                 'error' => 1,
                 'message' => 'Player Cannot Make Claim Request',
@@ -208,13 +208,13 @@ class TuArtController extends Controller
                 'message' => 'Incorrect Voucher Id!',
             ]);
         }
-        if(!$voucher->amount = 0){
+        if($voucher->amount == 0){
             return response()->json([
                 'error' => 1,
                 'message' => 'Cannot Claim This Voucher!',
             ]);
         }
-        if($voucher->value > $player->star){
+        if($voucher->value > $player->stars){
             return response()->json([
                 'error' => 1,
                 'message' => 'Cannot Claim This Voucher, Dont Enough Star!',
