@@ -145,7 +145,7 @@ class TuArtController extends Controller
         $gameRequest['play_time'] = strtotime(Carbon::now()->toDateTimeString()) - strtotime($gameRequest['created_at']);
         $gameRequest->status = 1;
         $gameRequest->save();
-        if ($gameRequest['play_time'] >= 30){
+        if ($gameRequest['play_time'] >= 10){
             $player['lvl'.$gameRequest->lvl] = $gameRequest->score;
             $player->save();
             return response()->json([
@@ -224,6 +224,7 @@ class TuArtController extends Controller
             ['player_id' => $player['id'], 'voucher_id' => $request->get('voucher_id')],
         ]);
         $player['is_claim'] = 1;
+        $player['voucher_id'] = $voucher->id;
         $voucher->amount -= 1;
         $player->save();
         return response()->json([
